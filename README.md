@@ -1,20 +1,20 @@
 
 # Table of Contents
 
-1.  [Manual Sort](#orgfe5a16d)
-    1.  [Purpose](#orgf100da4)
-    2.  [Specifications](#org349c0a5)
-    3.  [Feasability](#org4f6026e)
+1.  [Manual Sort](#org99919bf)
+    1.  [Purpose](#orgcb87226)
+    2.  [Specifications](#org42ada17)
+    3.  [Feasability](#orged56331)
 
 
-<a id="orgfe5a16d"></a>
+<a id="org99919bf"></a>
 
 # Manual Sort
 
-Intended for CPSC 312 Project 1, this program will allow users tto sort a list of items manually, prompting the user for pair-wise comparison until the list is fully sorted.
+Intended for CPSC 312 Project 1, this program will allow users to sort a list of items manually, prompting the user for pair-wise comparison until the list is fully sorted.
 
 
-<a id="orgf100da4"></a>
+<a id="orgcb87226"></a>
 
 ## Purpose
 
@@ -27,7 +27,7 @@ User provides a list of todo items in a text file. Running the program prompts t
 After the user answers enough questions, the program writes the sorted list back to a file.
 
 
-<a id="org349c0a5"></a>
+<a id="org42ada17"></a>
 
 ## Specifications
 
@@ -36,7 +36,7 @@ After the user answers enough questions, the program writes the sorted list back
 -   **Enough Questions:** Assume that comparisons are transitive, thus if A > B and later B > C, then we should implicitly order A > C to minimize the # of comparisons.
 
 
-<a id="org4f6026e"></a>
+<a id="orged56331"></a>
 
 ## Feasability
 
