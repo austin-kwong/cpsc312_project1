@@ -1,5 +1,10 @@
 import System.Environment
 
+-- TODO
+-- :: Consistency verification function, make sure updates don't break ordering invariants for bug detection
+-- :: Add case for less than
+-- :: Optimizatioon of propogation: do we need to recurse to all the elements, or is one way enough?
+
 main = do
   s <- readFile "example.txt"
   let tokens = tokenize s
@@ -41,8 +46,6 @@ updateComparison r c n a
   | n == Equal = basicUpdated
   | n == More  = foldr (\(ri, ci) m -> updateField r ci More m) basicUpdated (indicesWhere (\ri ci v -> ri == c && (v == Equal || v == More)) basicUpdated)
     where basicUpdated = updateField r c n (updateField c r (opposite n) a)
-
-
 
 -- update the field in a given matrix, where
 -- - r is the row
