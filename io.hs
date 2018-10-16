@@ -9,12 +9,21 @@ main = do
   s <- readFile "example.txt"
   let tokens = tokenize s
   let comparisonMatrix = [[if (c /= r) then Unknown else Equal | (c, _) <- zipWithIndex tokens] | (r, _) <- zipWithIndex tokens]
-  print comparisonMatrix
+  printmatrix comparisonMatrix
   writeFile "sorted.txt" s
 
 -- data definitions for comparison matrix
-data ComparisonResult = Less | Equal | More | Unknown deriving (Read, Show, Enum, Eq, Ord)
+data ComparisonResult = Less | Equal | More | Unknown deriving (Read, Enum, Eq, Ord)
 type ComparisonMatrix = [[ComparisonResult]]
+
+instance Show ComparisonResult where
+    show Equal = "   Equal   "
+    show Less = "   Less    "
+    show More = "   More    "
+    show Unknown = "  Unknown  "
+
+-- prints matrix nicely
+printmatrix m = putStrLn (unlines (map show m))
 
 opposite :: ComparisonResult -> ComparisonResult
 opposite cr
@@ -37,15 +46,38 @@ Implied comparisons means the assumption of total ordering, but equality is perm
   - If rth item Less urgent, the opposite of above is true
 -}
 
--- let m = [[Equal, Unknown, Unknown], [More, Equal, Unknown], [Unknown, Unknown, Equal]]
--- updateComparison 2 1 More m
--- expect: [[Equal,Unknown,Unknown],[More,Equal,Less],[More,More,Equal]]
 
 updateComparison :: Int -> Int -> ComparisonResult -> ComparisonMatrix -> ComparisonMatrix
-updateComparison r c n a
-  | n == Equal = basicUpdated
-  | n == More  = foldr (\(ri, ci) m -> updateField r ci More m) basicUpdated (indicesWhere (\ri ci v -> ri == c && (v == Equal || v == More)) basicUpdated)
-    where basicUpdated = updateField r c n (updateField c r (opposite n) a)
+updateComparison r c comp mat
+  | comp == Equal = basicUpdated
+  | otherwise = foldr 
+                  (\(ri, ci) m -> if (getAt r ci m /= comp) then (updateComparison r ci comp m) else m) 
+                  basicUpdated 
+                  (indicesWhere (\ri _ v -> ri == c && (v == Equal || v == comp)) basicUpdated)
+      where basicUpdated = updateField r c comp (updateField c r (opposite comp) mat)
+
+-- Try:
+--
+-- let m = [[Equal, Unknown, Unknown], [Equal, Equal, Unknown], [Unknown, Unknown, Equal]]
+-- updateComparison 2 1 More m
+-- expect: [[Equal,Unknown,Unknown],[More,Equal,Less],[More,More,Equal]]
+--
+-- let m = [[Equal, Equal, Unknown, Unknown], [Equal, Equal, Less, Unknown], [Unknown, More, Equal, Unknown], [Unknown, Unknown, Unknown, Equal]]
+-- [   Equal   ,   Equal   ,  Unknown  ,  Unknown  ]
+-- [   Equal   ,   Equal   ,   Less    ,  Unknown  ]
+-- [  Unknown  ,   More    ,   Equal   ,  Unknown  ]
+-- [  Unknown  ,  Unknown  ,  Unknown  ,   Equal   ]
+-- updateComparison 3 2 More m
+-- expect: 
+-- [   Equal   ,   Equal   ,  Unknown  ,   Less    ]
+-- [   Equal   ,   Equal   ,   Less    ,   Less    ]
+-- [  Unknown  ,   More    ,   Equal   ,   Less    ]
+-- [   More    ,   More    ,   More    ,   Equal   ]
+
+-- let m = [[Equal, More, Unknown, Unknown], [Equal, Equal, More, Unknown], [Unknown, Less, Equal, Unknown], [Unknown, Unknown, Unknown, Equal]]
+
+
+
 
 -- update the field in a given matrix, where
 -- - r is the row
