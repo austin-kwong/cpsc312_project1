@@ -29,7 +29,7 @@ insertInto (row, insertValue) matrix ((column, sortedValue): t) =
             input <- getLine
             case () of
               () | input `elem` ["M", "m"] -> insertInto (row, insertValue)  (updateComparison row column More matrix) ((column, sortedValue): t)
-                 | input `elem` ["N", "n"] -> insertInto (row, insertValue) (updateComparison row column Less matrix) ((column, sortedValue): t)
+                 | input `elem` ["L", "l"] -> insertInto (row, insertValue) (updateComparison row column Less matrix) ((column, sortedValue): t)
                  |  otherwise -> insertInto (row, insertValue) (updateComparison row column Equal matrix) ((column, sortedValue): t)
               
         Less -> do
@@ -37,7 +37,7 @@ insertInto (row, insertValue) matrix ((column, sortedValue): t) =
           return (newMatrix, (column, sortedValue):sortedRest)
           
         otherwise -> return (matrix, ((row, insertValue):(column, sortedValue): t)) -- place at beginning of list and return
-        
+
 -- data definitions for comparison matrix
 data ComparisonResult = Less | Equal | More | Unknown deriving (Read, Enum, Eq)
 type ComparisonMatrix = [[ComparisonResult]]
@@ -148,3 +148,12 @@ zipWithIndex lst = zip [0..(length lst)] lst
 -- collapse a list of strings to a single newline seperated string
 collapseStrings lst = foldr (\x acc -> x ++ "\n" ++ acc) "" lst
 
+-- split list
+-- |returns a tuple of (floor n/2) elements and (ceil n/2) elements
+splitList :: [a] -> ([a], [a])
+splitList [] = ([], [])
+splitList lst = splitListHelper lst (floor (fromIntegral (length lst) / 2)) []
+
+splitListHelper :: [a] -> Int -> [a] -> ([a], [a])
+splitListHelper lst 0 acc = (acc, lst)
+splitListHelper (h:t) n acc = splitListHelper t (n - 1) (acc++[h]) 
