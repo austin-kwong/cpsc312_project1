@@ -25,12 +25,12 @@ insertInto (index, value) matrix [] = return (matrix, [(index, value)])
 insertInto (row, insertValue) matrix ((column, sortedValue): t) = 
       case (getAt row column matrix) of
         Unknown -> do
-            putStrLn ("Is [" ++ insertValue ++ "] more important than [" ++ sortedValue ++ "]")
+            putStrLn ("Is {" ++ insertValue ++ "} [M]ore or [L] than {" ++ sortedValue ++ "}? or [I]ndifferent")
             input <- getLine
-            case input of
-              "y" -> insertInto (row, insertValue) (updateComparison row column More matrix) ((column, sortedValue): t)
-              "n" -> insertInto (row, insertValue) (updateComparison row column Less matrix) ((column, sortedValue): t)
-              otherwise -> insertInto (row, insertValue) (updateComparison row column Equal matrix) ((column, sortedValue): t)
+            case () of
+              () | input `elem` ["M", "m"] -> insertInto (row, insertValue)  (updateComparison row column More matrix) ((column, sortedValue): t)
+                 | input `elem` ["N", "n"] -> insertInto (row, insertValue) (updateComparison row column Less matrix) ((column, sortedValue): t)
+                 |  otherwise -> insertInto (row, insertValue) (updateComparison row column Equal matrix) ((column, sortedValue): t)
               
         Less -> do
           (newMatrix, sortedRest) <- (insertInto (row, insertValue) matrix t)--put deeper in list
