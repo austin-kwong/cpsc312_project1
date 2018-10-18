@@ -3,7 +3,7 @@ import System.Environment
 -- Insertion sort methods
 --------------------------------------------
 --------------------------------------------
-main = do
+main_insertion = do
   s <- readFile "example.txt"
   let tokens = tokenize s
   let comparisonMatrix = [[if (c /= r) then Unknown else Equal | (c, _) <- zipWithIndex tokens] | (r, _) <- zipWithIndex tokens]
@@ -50,7 +50,7 @@ main_merge = do
   s <- readFile "example.txt"
   let tokens = tokenize s
   let comparisonMatrix = [[if (c /= r) then Unknown else Equal | (c, _) <- zipWithIndex tokens] | (r, _) <- zipWithIndex tokens]
-  sortedTasks <- mergeSort tokens comparisonMatrix
+  sortedTasks <- mergeSortConverter tokens comparisonMatrix
   let output = collapseStrings sortedTasks
   writeFile "output.txt" output
   putStrLn "Here is the new order: "
@@ -58,7 +58,7 @@ main_merge = do
 
 -- Merge sort algorithm
 -- Strips the indices off the elements in the list return by mergeSortHelper
-mergeSort :: [String] -> ComparisonMatrix -> IO [String]
+mergeSortConverter :: [String] -> ComparisonMatrix -> IO [String]
 mergeSortConverter tokens comparisonMatrix =
   do
     sorted <- mergeSort (zipWithIndex tokens) comparisonMatrix
