@@ -5,7 +5,7 @@ import System.Environment
 --------------------------------------------
 main_insertion = do
   s <- readFile "example.txt"
-  let tokens = tokenize s
+  let tokens = (shuffleList (tokenize s))
   let comparisonMatrix = [[if (c /= r) then Unknown else Equal | (c, _) <- zipWithIndex tokens] | (r, _) <- zipWithIndex tokens]
   sortedTasks <- insertionSort (zipWithIndex tokens) [] comparisonMatrix
   let output = collapseStrings sortedTasks
@@ -48,7 +48,7 @@ insertInto (row, insertValue) matrix ((column, sortedValue): t) =
 
 main_merge = do
   s <- readFile "example.txt"
-  let tokens = tokenize s
+  let tokens = (shuffleList (tokenize s))
   let comparisonMatrix = [[if (c /= r) then Unknown else Equal | (c, _) <- zipWithIndex tokens] | (r, _) <- zipWithIndex tokens]
   sortedTasks <- mergeSortConverter tokens comparisonMatrix
   let output = collapseStrings sortedTasks
@@ -204,7 +204,9 @@ tokenize string = (tokenizeHelper string '\n' [] [])
 tokenizeHelper :: String -> Char -> String ->  [String] -> [String]
 tokenizeHelper [] c currAcc acc = rev acc
 tokenizeHelper (h:t) c currAcc acc
-  | h == c = tokenizeHelper t c [] (rev currAcc:acc)
+  | h == c = if (currAcc /= [])
+    then tokenizeHelper t c [] (rev currAcc:acc)
+    else tokenizeHelper t c [] acc
   | otherwise = tokenizeHelper t c (h:currAcc) acc
 
 -- util functions
@@ -233,17 +235,30 @@ splitListHelper :: [a] -> Int -> [a] -> ([a], [a])
 splitListHelper lst 0 acc = (acc, lst)
 splitListHelper (h:t) n acc = splitListHelper t (n - 1) (acc++[h]) 
 
--- shuffles a list randomly
---
+
+-- List Randomizer
+-- constant declarations
 
 multiplier = 18342
 increment  = 13824
 modulus    = 71342
+seed       = 19394
 
+-- function to produce the next pseudo-random number
 nextRand :: Int -> Int
 nextRand n = (multiplier * n + increment) `mod` modulus
 
-shuffleList lst = shuffleListHelper lst
+-- creates a generator for an infinite of random numbers
+randomSequence = iterate nextRand
 
+-- shuffles the list using the random sequence
+shuffleList lst = shuffleListHelper lst (map (\(x,y) -> (y `mod` x)) (zip (rev [1..(length lst)]) (take (length lst) (randomSequence seed))))
 
+shuffleListHelper [] indicesToTake = []
+shuffleListHelper lst [] = lst
+shuffleListHelper lst (h:t) =
+  let (value, restOfList) = removeAndTakeAt lst h
+  in (value: (shuffleListHelper restOfList t))
+
+-- helper function for modifiying a list
 removeAndTakeAt lst n = (lst!!n, [x | (i, x) <- (zipWithIndex lst), i /= n ])
