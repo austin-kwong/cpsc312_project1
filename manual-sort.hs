@@ -1,5 +1,8 @@
 import System.Environment
 
+-- Insertion sort methods
+--------------------------------------------
+--------------------------------------------
 main = do
   s <- readFile "example.txt"
   let tokens = tokenize s
@@ -37,6 +40,73 @@ insertInto (row, insertValue) matrix ((column, sortedValue): t) =
           return (newMatrix, (column, sortedValue):sortedRest)
           
         otherwise -> return (matrix, ((row, insertValue):(column, sortedValue): t)) -- place at beginning of list and return
+
+
+-- Merge sort methods
+--------------------------------------------
+--------------------------------------------
+
+main_merge = do
+  s <- readFile "example.txt"
+  let tokens = tokenize s
+  let comparisonMatrix = [[if (c /= r) then Unknown else Equal | (c, _) <- zipWithIndex tokens] | (r, _) <- zipWithIndex tokens]
+  sortedTasks <- mergeSort tokens comparisonMatrix
+  let output = collapseStrings sortedTasks
+  writeFile "output.txt" output
+  putStrLn "Here is the new order: "
+  putStrLn output
+
+-- Merge sort algorithm
+-- Strips the indices off the elements in the list return by mergeSortHelper
+mergeSort :: [String] -> ComparisonMatrix -> IO [String]
+mergeSortConverter tokens comparisonMatrix =
+  do
+    sorted <- mergeSort (zipWithIndex tokens) comparisonMatrix
+    return (map (\(_, y) -> y) sorted)
+
+-- This is the actual merge sort algorithm
+mergeSort :: [(Int, String)] -> ComparisonMatrix -> IO [(Int, String)]
+mergeSort [] _ = return []
+mergeSort [x] _ = return [x]
+mergeSort xs matrix =
+  do
+    fstHalfSorted <- (mergeSort (fstHalf xs) matrix)
+    sndHalfSorted <- (mergeSort (sndHalf xs) matrix)
+    (newMatrix, sorted) <- merge fstHalfSorted sndHalfSorted matrix
+    return sorted
+
+-- Recursively merge items from two sorted lists, caching comparisons for later use
+merge :: [(Int, String)] ->  [(Int, String)] -> ComparisonMatrix -> IO (ComparisonMatrix, [(Int, String)])
+merge xs [] matrix = return (matrix, xs)
+merge [] ys matrix = return (matrix, ys)
+merge ((row, value1):xs) ((column, value2):ys) matrix =
+    case (getAt row column matrix) of
+      Unknown -> do
+          putStrLn("Is {" ++ value1 ++ "} [M]ore or [L] than {" ++ value2 ++ "}? or [I]ndifferent")
+          input <- getLine
+          case () of
+            () | input `elem` ["M", "m"] -> do 
+                  (newMatrix, sorted) <- (merge xs ((column, value2):ys) (updateComparison row column More matrix))
+                  return (newMatrix, (row, value1):sorted)
+               | input `elem` ["L", "l"] -> do
+                  (newMatrix, sorted) <- (merge ((row, value1):xs) ys (updateComparison row column Less matrix))
+                  return (newMatrix, (column, value2):sorted)
+               | otherwise -> do
+                  (newMatrix, sorted) <- (merge xs ((column, value2):ys) (updateComparison row column Equal matrix))
+                  return (newMatrix, (row, value1):sorted)
+
+      Less -> do
+          (newMatrix, sorted) <- (merge ((row, value1):xs) ys matrix)
+          return (newMatrix,(column, value2):sorted)
+
+      otherwise -> do
+          (newMatrix, sorted) <- (merge xs ((column, value2):ys) matrix)
+          return (newMatrix,  (row, value1):sorted)
+
+
+-- Other helper methods and data definitions
+--------------------------------------------
+--------------------------------------------
 
 -- data definitions for comparison matrix
 data ComparisonResult = Less | Equal | More | Unknown deriving (Read, Enum, Eq)
@@ -147,6 +217,11 @@ zipWithIndex lst = zip [0..(length lst)] lst
 
 -- collapse a list of strings to a single newline seperated string
 collapseStrings lst = foldr (\x acc -> x ++ "\n" ++ acc) "" lst
+
+-- gives the first half of a list
+fstHalf lst = fst (splitList lst)
+-- gives the second half of a list
+sndHalf lst = snd (splitList lst)
 
 -- split list
 -- |returns a tuple of (floor n/2) elements and (ceil n/2) elements
