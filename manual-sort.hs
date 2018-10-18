@@ -29,7 +29,7 @@ insertInto (row, insertValue) matrix ((column, sortedValue): t) =
             input <- getLine
             case () of
               () | input `elem` ["M", "m"] -> insertInto (row, insertValue)  (updateComparison row column More matrix) ((column, sortedValue): t)
-                 | input `elem` ["N", "n"] -> insertInto (row, insertValue) (updateComparison row column Less matrix) ((column, sortedValue): t)
+                 | input `elem` ["L", "l"] -> insertInto (row, insertValue) (updateComparison row column Less matrix) ((column, sortedValue): t)
                  |  otherwise -> insertInto (row, insertValue) (updateComparison row column Equal matrix) ((column, sortedValue): t)
               
         Less -> do
