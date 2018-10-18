@@ -232,3 +232,18 @@ splitList lst = splitListHelper lst (floor (fromIntegral (length lst) / 2)) []
 splitListHelper :: [a] -> Int -> [a] -> ([a], [a])
 splitListHelper lst 0 acc = (acc, lst)
 splitListHelper (h:t) n acc = splitListHelper t (n - 1) (acc++[h]) 
+
+-- shuffles a list randomly
+--
+
+multiplier = 18342
+increment  = 13824
+modulus    = 71342
+
+nextRand :: Int -> Int
+nextRand n = (multiplier * n + increment) `mod` modulus
+
+shuffleList lst = shuffleListHelper lst
+
+
+removeAndTakeAt lst n = (lst!!n, [x | (i, x) <- (zipWithIndex lst), i /= n ])
